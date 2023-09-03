@@ -8,13 +8,12 @@ namespace ZuList
     using System.Diagnostics.CodeAnalysis;
     using System.Runtime.CompilerServices;
     using System.Runtime.InteropServices;
-    using System.Text.RegularExpressions;
     using ZuList.Internal;
 
     [DebuggerTypeProxy(typeof(FastListDebugView<>))]
     [DebuggerDisplay("Count = {Count} Capacity = {Capacity}")]
     [Serializable]
-    public partial class FastList<T> : IList<T>, IList
+    public partial class FastList<T> : IList<T>, IList, IReadOnlyList<T>
     {
         private const int _defaultCapacity = 4;
         private static readonly T[] _empty = Array.Empty<T>();
