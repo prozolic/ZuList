@@ -4,6 +4,7 @@ namespace ZuList
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
     using System.Runtime.CompilerServices;
@@ -113,7 +114,20 @@ namespace ZuList
             }
         }
 
-        public bool Exists => _size != 0;
+        public bool IsEmpty => _size != 0;
+
+        public ReadOnlyCollection<T> AsReadOnly()
+            => new(this);
+
+        public List<T> AsList()
+        {
+            var list = new List<T>();
+            var copy = Unsafe.As<List<T>, ListCopy>(ref list);
+            copy._items = _items;
+            copy._size = _size;
+            copy._version = _version;
+            return list;
+        }
 
         public int EnsureCapacity(int capacity)
         {
@@ -122,6 +136,13 @@ namespace ZuList
                 this.DangerousEnsureCapacity(this.CalculateEnsureCapacity(capacity));
             }
             return _items.Length;
+        }
+
+        public void ShrinkToFit() 
+        {
+            if (_items.Length == 0) return;
+
+            this.DangerousEnsureCapacity(_size);
         }
 
         public void AddRange(FastList<T> fastList)
@@ -225,7 +246,7 @@ namespace ZuList
             }
             var moveItemSpan = _items.AsSpan(index, _size - index);
 
-            // moveItem  memory copying of arrays
+            // moveItem memory copying of arrays
             var moveItemByteCount = Unsafe.SizeOf<T>() * moveItemSpan.Length;
             ref var source = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(moveItemSpan)!);
             ref var dest = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(_items.AsSpan(index + collection.Count, _size - index))!);
@@ -239,7 +260,7 @@ namespace ZuList
 
         private void DangerousInsertRange(int index, Span<T> moveItemSpan, Span<T> insertItemSpan)
         {
-            // moveItem  memory copying of arrays
+            // moveItem memory copying of arrays
             var moveItemByteCount = Unsafe.SizeOf<T>() * moveItemSpan.Length;
             ref var source = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(moveItemSpan)!);
             ref var dest = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(_items.AsSpan(index + insertItemSpan.Length, _size - index))!);
@@ -326,6 +347,9 @@ namespace ZuList
             }
             return _size - removedIndex;
         }
+
+        public bool Exists(Predicate<T> match)
+            => this.FindIndex(match) > -1;
 
         public T? Find(Predicate<T> match)
         {
@@ -439,6 +463,8 @@ namespace ZuList
 
         public void ForEach(Action<T> action)
         {
+            ErrorHelper.ThrowArgumentNullException(action, nameof(action));
+
             FastList<T>.ForEachSpan(ref action, _items.AsSpan(0, _size));
         }
 
@@ -823,6 +849,13 @@ namespace ZuList
                     ErrorHelper.ThrowInvalidOperationExceptionIfEnumerationFailed();
                 }
             }
+        }
+
+        private class ListCopy
+        {
+            public T[] _items;
+            public int _size;
+            public int _version;
         }
 
         #endregion
