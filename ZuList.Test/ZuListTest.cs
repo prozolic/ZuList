@@ -1,5 +1,6 @@
 namespace ZuList.Test
 {
+    using System.Linq;
     using ZuList;
 
     public class ZuListTest
@@ -84,7 +85,55 @@ namespace ZuList.Test
 
         public class ListCompatible
         {
+            public class AddRange
+            {
+                private static readonly int[] array = Enumerable.Range(1, 5).ToArray();
+                private static readonly string[] strArray = array.Select(a => a.ToString()).ToArray();
 
+                [Fact]
+                public void ValueIEnumerable()
+                {
+                    var list = new FastList<int>();
+                    list.AddRange((IEnumerable<int>)array);
+
+                    Assert.Equal(array.Length, list.Count);
+                    Assert.Equal(8, list.Capacity);
+                    Assert.True(array.SequenceEqual(list));
+                }
+
+                [Fact]
+                public void RefValueIEnumerable()
+                {
+                    var list = new FastList<string>();
+                    list.AddRange((IEnumerable<string>)strArray);
+
+                    Assert.Equal(strArray.Length, list.Count);
+                    Assert.Equal(8, list.Capacity);
+                    Assert.True(strArray.SequenceEqual(list));
+                }
+
+                [Fact]
+                public void ValueArray()
+                {
+                    var list = new FastList<int>();
+                    list.AddRange(array);
+
+                    Assert.Equal(array.Length, list.Count);
+                    Assert.Equal(array.Length, list.Capacity);
+                    Assert.True(array.SequenceEqual(list));
+                }
+
+                [Fact]
+                public void RefValueArray()
+                {
+                    var list = new FastList<string>();
+                    list.AddRange(strArray);
+
+                    Assert.Equal(strArray.Length, list.Count);
+                    Assert.Equal(strArray.Length, list.Capacity);
+                    Assert.True(strArray.SequenceEqual(list));
+                }
+            }
         }
 
         public class IListGeneric
