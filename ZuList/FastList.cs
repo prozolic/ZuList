@@ -332,10 +332,10 @@ namespace ZuList
         {
             ErrorHelper.ThrowArgumentNullException(match, nameof(match));
 
-            return this.FindSpan(ref match, _items.AsSpan(0, _size));
+            return FastList<T>.FindSpan(ref match, _items.AsSpan(0, _size));
         }
 
-        private T? FindSpan(ref Predicate<T> match, Span<T> itemSpan)
+        private static T? FindSpan(ref Predicate<T> match, Span<T> itemSpan)
         {
             for (int i = 0; i < itemSpan.Length; i++)
             {
