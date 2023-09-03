@@ -359,14 +359,14 @@ namespace ZuList
             if ((uint)_size < (uint)startIndex) ErrorHelper.ThrowArgumentOutOfRangeException(nameof(startIndex));
             if (count < 0 && _size - count < startIndex) ErrorHelper.ThrowArgumentOutOfRangeException("");
 
-            return this.FindIndexSpan(ref match, _items.AsSpan(startIndex, count));
+            return FastList<T>.FindIndexSpan(ref match, _items.AsSpan(startIndex, count), startIndex);
         }
 
-        private int FindIndexSpan(ref Predicate<T> match, Span<T> itemSpan)
+        private static int FindIndexSpan(ref Predicate<T> match, Span<T> itemSpan, int startIndex)
         {
             for (int i = 0; i < itemSpan.Length; i++)
             {
-                if (match(_items[i])) return i;
+                if (match(itemSpan[i])) return i + startIndex;
             }
             return -1;
         }
@@ -375,10 +375,10 @@ namespace ZuList
         {
             ErrorHelper.ThrowArgumentNullException(match, nameof(match));
 
-            return this.FindLastSpan(ref match, _items.AsSpan(0, _size));
+            return FastList<T>.FindLastSpan(ref match, _items.AsSpan(0, _size));
         }
 
-        private T? FindLastSpan(ref Predicate<T> match, Span<T> itemSpan)
+        private static T? FindLastSpan(ref Predicate<T> match, Span<T> itemSpan)
         {
             for (int i = itemSpan.Length - 1; i >= 0; i--)
             {
@@ -402,16 +402,17 @@ namespace ZuList
             if ((uint)_size < (uint)startIndex) ErrorHelper.ThrowArgumentOutOfRangeException(nameof(startIndex));
             if (count < 0 && _size - count < startIndex) ErrorHelper.ThrowArgumentOutOfRangeException("");
 
-            return this.FindLastIndexSpan(ref match, _items.AsSpan(startIndex, count));
+            var endIndex = startIndex - count + 1;
+            return FastList<T>.FindLastIndexSpan(ref match, _items.AsSpan(endIndex, count), endIndex);
         }
 
-        private int FindLastIndexSpan(ref Predicate<T> match, Span<T> itemSpan)
+        private static int FindLastIndexSpan(ref Predicate<T> match, Span<T> itemSpan, int endIndex)
         {
             for (int i = itemSpan.Length - 1; i >= 0; i--)
             {
                 if (match(itemSpan[i]))
                 {
-                    return i;
+                    return i + endIndex;
                 }
             }
             return -1;
@@ -421,10 +422,10 @@ namespace ZuList
         {
             ErrorHelper.ThrowArgumentNullException(match, nameof(match));
 
-            return this.FindAllSpan(ref match, _items.AsSpan(0, _size));
+            return FastList<T>.FindAllSpan(ref match, _items.AsSpan(0, _size));
         }
 
-        private FastList<T> FindAllSpan(ref Predicate<T> match, Span<T> itemSpan)
+        private static FastList<T> FindAllSpan(ref Predicate<T> match, Span<T> itemSpan)
         {
             var fastList = new FastList<T>();
             for (int i = 0; i < itemSpan.Length; i++)
@@ -439,10 +440,10 @@ namespace ZuList
 
         public void ForEach(Action<T> action)
         {
-            this.ForEachSpan(ref action, _items.AsSpan(0, _size));
+            FastList<T>.ForEachSpan(ref action, _items.AsSpan(0, _size));
         }
 
-        private void ForEachSpan(ref Action<T> action, Span<T> itemSpan)
+        private static void ForEachSpan(ref Action<T> action, Span<T> itemSpan)
         {
             for (int i = 0; i < itemSpan.Length; i++)
             {
