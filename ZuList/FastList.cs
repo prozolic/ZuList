@@ -119,16 +119,6 @@ namespace ZuList
         public ReadOnlyCollection<T> AsReadOnly()
             => new(this);
 
-        public List<T> AsList()
-        {
-            var list = new List<T>();
-            var copy = Unsafe.As<List<T>, ListCopy>(ref list);
-            copy._items = _items;
-            copy._size = _size;
-            copy._version = _version;
-            return list;
-        }
-
         public int EnsureCapacity(int capacity)
         {
             if (_items.Length < capacity)
@@ -138,11 +128,21 @@ namespace ZuList
             return _items.Length;
         }
 
-        public void ShrinkToFit() 
+        public int ShrinkToFitCapacity() 
         {
-            if (_items.Length == 0) return;
+            var size = _size;
+            if (size == 0)
+            {
+                _items = _empty;
+                return size;
+            }
 
-            this.DangerousEnsureCapacity(_size);
+            if (size < _items.Length)
+            {
+                this.DangerousEnsureCapacity(size);
+            }
+            
+            return size;
         }
 
         public void AddRange(FastList<T> fastList)
@@ -314,7 +314,7 @@ namespace ZuList
             ErrorHelper.ThrowArgumentNullException(match, nameof(match));
 
             int removedIndex = 0;
-            var result = this.RemoveAllSpan(_items.AsSpan(0, _size), ref match, ref removedIndex);
+            var result = this.RemoveAllSpan(ref match, _items.AsSpan(0, _size), ref removedIndex);
             if (result == 0) return result;
 
             if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
@@ -327,7 +327,7 @@ namespace ZuList
             return result;
         }
 
-        private int RemoveAllSpan(Span<T> items, ref Predicate<T> match, ref int removedIndex)
+        private int RemoveAllSpan( ref Predicate<T> match, Span<T> items, ref int removedIndex)
         {
             while (removedIndex < _size && !match(items[removedIndex]))
             {
@@ -524,7 +524,26 @@ namespace ZuList
             return array;
         }
 
-#endregion
+        public List<T> ToList()
+        {
+            var list = new List<T>();
+            var copy = Unsafe.As<List<T>, ListCopy>(ref list);
+
+            var argsListArray = _items.AsSpan(0, _size);
+            copy._items = new T[argsListArray.Length];
+            copy._size = _size;
+            copy._version = _version;
+
+            // memory copying of arrays
+            var byteCount = Unsafe.SizeOf<T>() * argsListArray.Length;
+            ref var source = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(argsListArray)!);
+            ref var dest = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetArrayDataReference(copy._items)!);
+            Unsafe.CopyBlockUnaligned(ref dest, ref source, (uint)byteCount);
+
+            return list;
+        }
+
+        #endregion
 
         #region "IList<T>"
 
