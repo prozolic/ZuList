@@ -47,7 +47,7 @@ namespace ZuList
             _items = new T[argsListSize];
 
             // memory copying of arrays
-            var byteCount = Unsafe.SizeOf<T>() * argsListSize;
+            var byteCount = UnsafeSize<T>.value * argsListSize;
             ref var source = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(argsListArray)!);
             ref var dest = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetArrayDataReference(_items)!);
             Unsafe.CopyBlockUnaligned(ref dest, ref source, (uint)byteCount);
@@ -162,7 +162,7 @@ namespace ZuList
             Span<T> sourceItemSpan = fastList._items.AsSpan(0, argsFastListSize);
 
             // additem memory copying of arrays
-            var addItemByteCount = Unsafe.SizeOf<T>() * destItem.Length;
+            var addItemByteCount = UnsafeSize<T>.value * destItem.Length;
             ref var source = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(sourceItemSpan)!);
             ref var dest = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(destItem)!);
             Unsafe.CopyBlockUnaligned(ref dest, ref source, (uint)addItemByteCount);
@@ -247,7 +247,7 @@ namespace ZuList
             var moveItemSpan = _items.AsSpan(index, _size - index);
 
             // moveItem memory copying of arrays
-            var moveItemByteCount = Unsafe.SizeOf<T>() * moveItemSpan.Length;
+            var moveItemByteCount = UnsafeSize<T>.value * moveItemSpan.Length;
             ref var source = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(moveItemSpan)!);
             ref var dest = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(_items.AsSpan(index + collection.Count, _size - index))!);
             Unsafe.CopyBlockUnaligned(ref dest, ref source, (uint)moveItemByteCount);
@@ -261,13 +261,13 @@ namespace ZuList
         private void DangerousInsertRange(int index, Span<T> moveItemSpan, Span<T> insertItemSpan)
         {
             // moveItem memory copying of arrays
-            var moveItemByteCount = Unsafe.SizeOf<T>() * moveItemSpan.Length;
+            var moveItemByteCount = UnsafeSize<T>.value * moveItemSpan.Length;
             ref var source = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(moveItemSpan)!);
             ref var dest = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(_items.AsSpan(index + insertItemSpan.Length, _size - index))!);
             Unsafe.CopyBlockUnaligned(ref dest, ref source, (uint)moveItemByteCount);
 
             // insertitem memory copying of arrays
-            var insertItemByteCount = Unsafe.SizeOf<T>() * insertItemSpan.Length;
+            var insertItemByteCount = UnsafeSize<T>.value * insertItemSpan.Length;
             ref var source2 = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(insertItemSpan)!);
             ref var dest2 = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(_items.AsSpan(index, insertItemSpan.Length))!);
             Unsafe.CopyBlockUnaligned(ref dest2, ref source2, (uint)insertItemByteCount);
@@ -484,7 +484,7 @@ namespace ZuList
             var fastList = new FastList<T>(count);
 
             // memory copying of arrays
-            var byteCount = Unsafe.SizeOf<T>() * count;
+            var byteCount = UnsafeSize<T>.value * count;
             ref var source = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(_items.AsSpan(index, count))!);
             ref var dest = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetArrayDataReference(fastList._items)!);
             Unsafe.CopyBlockUnaligned(ref dest, ref source, (uint)byteCount);
@@ -516,7 +516,7 @@ namespace ZuList
             var array = new T[_size];
 
             // memory copying of arrays
-            var byteCount = Unsafe.SizeOf<T>() * array.Length;
+            var byteCount = UnsafeSize<T>.value * array.Length;
             ref var dest = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetArrayDataReference(array)!);
             ref var source = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetArrayDataReference(_items)!);
             Unsafe.CopyBlockUnaligned(ref dest, ref source, (uint)byteCount);
@@ -535,7 +535,7 @@ namespace ZuList
             copy._version = _version;
 
             // memory copying of arrays
-            var byteCount = Unsafe.SizeOf<T>() * argsListArray.Length;
+            var byteCount = UnsafeSize<T>.value * argsListArray.Length;
             ref var source = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(argsListArray)!);
             ref var dest = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetArrayDataReference(copy._items)!);
             Unsafe.CopyBlockUnaligned(ref dest, ref source, (uint)byteCount);
@@ -611,7 +611,7 @@ namespace ZuList
             var sourceArraySpan = _items.AsSpan(0, _size);
 
             // memory copying of arrays
-            var byteCount = Unsafe.SizeOf<T>() * destArraySpan.Length;
+            var byteCount = UnsafeSize<T>.value * destArraySpan.Length;
             ref var source = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(sourceArraySpan)!);
             ref var dest = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(destArraySpan)!);
             Unsafe.CopyBlockUnaligned(ref dest, ref source, (uint)byteCount);
@@ -621,10 +621,40 @@ namespace ZuList
             => new Enumerator(this);
 
         public int IndexOf(T item)
-            => Array.IndexOf(_items, item, 0, _size);
+        {
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+            {
+                return FastList<T>.IndexOfEqualityCompare(_items.AsSpan(0, _size), item, 0);
+            }
+
+            return Array.IndexOf(_items, item, 0, _size);
+        }
+
+        private static int IndexOfEqualityCompare(Span<T> arraySpan, T value, int startIndex)
+        {
+            if (value != null)
+            {
+                for (int i = 0; i < arraySpan.Length; i++)
+                {
+                    if (arraySpan[i] != null && arraySpan[i]!.Equals(value))
+                        return i + startIndex;
+                }
+            }
+            else
+            {
+                for (int i = 0; i < arraySpan.Length; i++)
+                {
+                    if (arraySpan[i] == null)
+                        return i + startIndex;
+                }
+            }
+            return -1;
+        }
+
 
         public void Insert(int index, T item)
         {
+            ErrorHelper.ThrowArgumentNullException(item, nameof(item));
             if ((uint)_size < (uint)index) ErrorHelper.ThrowArgumentOutOfRangeException(nameof(index));
 
             this.Add(item);
@@ -636,7 +666,7 @@ namespace ZuList
             var moveRangeCount = addedSize - (index + 1);
 
             // memory copying of arrays
-            var byteCount = Unsafe.SizeOf<T>() * moveRangeCount;
+            var byteCount = UnsafeSize<T>.value * moveRangeCount;
             ref var source = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(items.AsSpan(index, moveRangeCount))!);
             ref var dest = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(items.AsSpan(index + 1, moveRangeCount))!);
             Unsafe.CopyBlockUnaligned(ref dest, ref source, (uint)byteCount);
@@ -796,7 +826,7 @@ namespace ZuList
             if (_size > 0)
             {
                 // memory copying of arrays
-                var byteCount = Unsafe.SizeOf<T>() * _size;
+                var byteCount = UnsafeSize<T>.value * _size;
                 ref var source = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetArrayDataReference(_items)!);
                 ref var dest = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetArrayDataReference(newItems)!);
                 Unsafe.CopyBlockUnaligned(ref dest, ref source, (uint)byteCount);
@@ -877,9 +907,18 @@ namespace ZuList
             public int _version;
         }
 
+        private class UnsafeSize<T2>
+        {
+            public static readonly int value;
+
+            static UnsafeSize()
+            {
+                value = Unsafe.SizeOf<T2>();
+            }
+        }
+
         #endregion
 
     }
-
 
 }

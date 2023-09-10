@@ -24,7 +24,6 @@ namespace ZuList.Internal
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void ThrowArgumentNullException<T>(T value, string errorText)
-            where T : class?
         {
             if (value == null) throw new ArgumentNullException(errorText);
         }
