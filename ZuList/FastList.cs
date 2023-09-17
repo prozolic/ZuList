@@ -546,6 +546,26 @@ namespace ZuList
             return list;
         }
 
+        public string ToDebugString()
+        {
+            if (_size == 0) return "[ ]";
+
+            var builder = new System.Text.StringBuilder();
+            var arraySpan = _items.AsSpan(0, _size);
+            builder.Append('[');
+            for ( var i = 0; i < arraySpan.Length - 1; i++ )
+            {
+                builder.Append(' ');
+                builder.Append(arraySpan[i]?.ToString() ?? "null");
+                builder.Append(',');
+            }
+            builder.Append(' ');
+            builder.Append(arraySpan[arraySpan.Length-1]?.ToString() ?? "<null>");
+            builder.Append(' ');
+            builder.Append(']');
+            return builder.ToString();
+        }
+
         #endregion
 
         #region "IList<T>"
