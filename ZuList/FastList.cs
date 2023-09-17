@@ -506,6 +506,9 @@ namespace ZuList
             _version++;  
         }
 
+        public FastList<T> Slice(int start, int length)
+            => this.GetRange(start, length);
+
         public T[] ToArray()
         {
             if (_size == 0)
@@ -626,7 +629,7 @@ namespace ZuList
             {
                 return FastList<T>.IndexOfEqualityCompare(_items.AsSpan(0, _size), item, 0);
             }
-
+            
             return Array.IndexOf(_items, item, 0, _size);
         }
 
