@@ -171,6 +171,32 @@ namespace ZuList
             _version++;
         }
 
+        public void AddRange(T[] array)
+        {
+            ErrorHelper.ThrowArgumentNullException(array, nameof(array));
+            if (array.Length == 0) return;
+
+            var size = _size;
+            var argsArraySize = array.Length;
+            var addedSize = size + argsArraySize;
+            if (_items.Length < addedSize)
+            {
+                this.DangerousEnsureCapacity(this.CalculateEnsureCapacity(addedSize));
+            }
+
+            Span<T> destItem = _items.AsSpan(size, argsArraySize);
+            Span<T> sourceItemSpan = array.AsSpan();
+
+            // additem memory copying of arrays
+            var addItemByteCount = UnsafeSize<T>.value * destItem.Length;
+            ref var source = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(sourceItemSpan)!);
+            ref var dest = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(destItem)!);
+            Unsafe.CopyBlockUnaligned(ref dest, ref source, (uint)addItemByteCount);
+
+            _size = addedSize;
+            _version++;
+        }
+
         public void AddRange(ICollection<T> collection)
         {
             ErrorHelper.ThrowArgumentNullException(collection, nameof(collection));
