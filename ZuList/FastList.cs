@@ -238,7 +238,7 @@ namespace ZuList
             }
 
             // end index is AddRange
-            if (insertedSize == index + 1)
+            if (size == index)
             {
                 this.AddRange(fastList);
                 return;
@@ -246,6 +246,33 @@ namespace ZuList
 
             var moveItemSpan = _items.AsSpan(index, _size - index);
             var insertItemSpan = fastList._items.AsSpan(0, fastList._size);
+
+            this.DangerousInsertRange(index, moveItemSpan, insertItemSpan);
+            _size = insertedSize;
+            _version++;
+        }
+
+        public void InsertRange(int index, T[] array)
+        {
+            ErrorHelper.ThrowArgumentNullException(array, nameof(array));
+            if ((uint)_size < (uint)index) ErrorHelper.ThrowArgumentOutOfRangeException(nameof(index));
+
+            var size = _size;
+            var insertedSize = size + array.Length;
+            if (_items.Length < insertedSize)
+            {
+                this.DangerousEnsureCapacity(this.CalculateEnsureCapacity(insertedSize));
+            }
+
+            // end index is AddRange
+            if (size == index)
+            {
+                this.AddRange(array);
+                return;
+            }
+
+            var moveItemSpan = _items.AsSpan(index, _size - index);
+            var insertItemSpan = array.AsSpan();
 
             this.DangerousInsertRange(index, moveItemSpan, insertItemSpan);
             _size = insertedSize;
@@ -265,7 +292,7 @@ namespace ZuList
             }
 
             // end index is AddRange
-            if (insertedSize == index + 1)
+            if( size == index)
             {
                 this.AddRange(collection);
                 return;
