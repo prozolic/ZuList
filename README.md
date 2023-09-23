@@ -71,7 +71,7 @@ public void Sample()
 | `public T[] ToArray()`  |  |
 
 | property | description |
-| -- | -- | -- |
+| -- | -- |
 | `public int Capacity`  |  |
 
 **class FastList : `IList<T>`**
