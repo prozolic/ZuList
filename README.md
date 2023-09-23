@@ -70,9 +70,9 @@ public void Sample()
 | `public FastList<T> Slice(int start, int length)`  |  
 | `public T[] ToArray()`  |  |
 
-| property | description |
-| -- | -- |
-| `public int Capacity`  |  |
+| property | description |  
+| -- | -- |  
+| `public int Capacity`  |  |  
 
 **class FastList : `IList<T>`**
 
