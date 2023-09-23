@@ -3,6 +3,9 @@
 ZuList is collection that runs faster than System.Collections.Generic.List.  
 We target .NET 7 and The library code is pure C#.  
 
+* It can be used in the same way as `List<T>`
+* Internal use of `Span` for faster speed
+
 ## Quick Start
 
 It can be used in the same way as System.Collections.Generic.List.
@@ -67,7 +70,7 @@ public void Sample()
 | `public FastList<T> Slice(int start, int length)`  |  
 | `public T[] ToArray()`  |  |
 
-| property | description | Compatibility with `List<T>` |
+| property | description |
 | -- | -- | -- |
 | `public int Capacity`  |  |
 
@@ -85,8 +88,8 @@ public void Sample()
 | `public bool Remove(T item)` |  |
 | `public void RemoveAt(int index)` |  |
 
-| property | description | Compatibility with `List<T>` |
-| -- | -- | -- |
+| property | description |
+| -- | -- |
 | `public T this[int index]`  |  |
 | `public int Count`  |  |
 | `public bool IsReadOnly`  |  |
@@ -102,8 +105,8 @@ public void Sample()
 | `public void Remove(object? value)` |  |
 | `public void CopyTo(Array array, int arrayIndex)` |  |
 
-| property | description | Compatibility with `List<T>` |
-| -- | -- | -- |
+| property | description |
+| -- | -- |
 | `object? IList.this[int index]`  |  |
 | `public bool IsFixedSize`  |  |
 | `public bool IsSynchronized`  |  |
