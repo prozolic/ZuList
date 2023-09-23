@@ -1,14 +1,14 @@
 # ZuList
 
-ZuList is collection that runs faster than System.Collections.Generic.List.  
+ZuList is collection that runs faster than `System.Collections.Generic.List`.  
 We target .NET 7 and The library code is pure C#.  
 
-* It can be used in the same way as `List<T>`
+* It can be used in the same way as `System.Collections.Generic.List<T>`
 * Internal use of `Span` for faster speed
 
 ## Quick Start
 
-It can be used in the same way as System.Collections.Generic.List.
+It can be used in the same way as `System.Collections.Generic.List<T>`.
 
 ```csharp
 public void Sample()
@@ -28,15 +28,14 @@ public void Sample()
 
 | method | description |
 | -- | -- |
-| `public void AddRange(FastList<T> fastList)` |  |
-| `public void AddRange(T[] array)` |  |
-| `public void AddRange(ICollection<T> collection)` | |
-| `public void InsertRange(int index, FastList<T> fastList)`  |  |
-| `public void InsertRange(int index, T[] array)`  |  |
-| `public void InsertRange(int index, ICollection<T> collection)`  |  |
-| `public List<T> ToList()`  |  |
-| `public string ToDebugString()`  |  |
-| `public List<T> ToList()`  |  |
+| `public void AddRange(FastList<T> fastList)` | Adds the elements of the specified `FastList<T>` to the end of the `FastList<T>`. |
+| `public void AddRange(T[] array)` | Adds the elements of the specified array to the end of the `FastList<T>`. |
+| `public void AddRange(ICollection<T> collection)` | Adds the elements of the specified `ICollection<T>` to the end of the `FastList<T>`. |
+| `public void InsertRange(int index, FastList<T> fastList)`  | Inserts an element of the `FastList<T>` at the specified index position in the `FastList<T>`. |
+| `public void InsertRange(int index, T[] array)`  | Inserts an element of the array at the specified index position in the `FastList<T>`. |
+| `public void InsertRange(int index, ICollection<T> collection)`  | Inserts an element of the `ICollection<T>` at the specified index position in the `FastList<T>`. |
+| `public List<T> ToList()`  | Copies the elements of `FastList<T>` to a new `System.Collections.Generic.List<T>`. |
+| `public string ToDebugString()`  | `FastList<T>` Returns a debugging string representing |
 
 | property | description |
 | -- | -- |
