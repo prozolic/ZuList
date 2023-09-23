@@ -10,6 +10,7 @@ namespace ZuList
     using System.Runtime.CompilerServices;
     using System.Runtime.InteropServices;
     using ZuList.Internal;
+    using static System.Runtime.InteropServices.JavaScript.JSType;
 
     [DebuggerTypeProxy(typeof(FastListDebugView<>))]
     [DebuggerDisplay("Count = {Count} Capacity = {Capacity}")]
@@ -229,6 +230,7 @@ namespace ZuList
         {
             ErrorHelper.ThrowArgumentNullException(fastList, nameof(fastList));
             if ((uint)_size < (uint)index) ErrorHelper.ThrowArgumentOutOfRangeException(nameof(index));
+            if (fastList._size == 0) return;
 
             var size = _size;
             var insertedSize = size + fastList._size;
@@ -256,6 +258,7 @@ namespace ZuList
         {
             ErrorHelper.ThrowArgumentNullException(array, nameof(array));
             if ((uint)_size < (uint)index) ErrorHelper.ThrowArgumentOutOfRangeException(nameof(index));
+            if (array.Length == 0) return;
 
             var size = _size;
             var insertedSize = size + array.Length;
@@ -283,6 +286,7 @@ namespace ZuList
         {
             ErrorHelper.ThrowArgumentNullException(collection, nameof(collection));
             if ((uint)_size < (uint)index) ErrorHelper.ThrowArgumentOutOfRangeException(nameof(index));
+            if (collection.Count == 0) return;
 
             var size = _size;
             var insertedSize = size + collection.Count;
