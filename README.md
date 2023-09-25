@@ -47,6 +47,10 @@ public void Sample()
 | -- | -- |
 | `public void AddRange(IEnumerable<T> collection)` |  |
 | `public ReadOnlyCollection<T> AsReadOnly()` |  |
+| `public int BinarySearch(T item)` |  |
+| `public int BinarySearch(T item, IComparer<T>? comparer)` |  |
+| `public int BinarySearch(int index, int count, T item, IComparer<T>? comparer)` |  |
+| `public FastList<TOutput> ConvertAll<TOutput>(Converter<T, TOutput> converter)` |  |
 | `public int EnsureCapacity(int capacity)`  |  |
 | `public bool Exists(Predicate<T> match)`  |  |
 | `public T? Find(Predicate<T> match)`  |  |
@@ -67,7 +71,13 @@ public void Sample()
 | `public void Reverse(int index, int count)`  |  |
 | `public int ShrinkToFitCapacity()`  |  |
 | `public FastList<T> Slice(int start, int length)`  |  
+| `public void Sort()`  |  |
+| `public void Sort(IComparer<T>? comparer)`  |  |
+| `public void Sort(int index, int count, IComparer<T>? comparer)`  |  |
+| `public void Sort(Comparison<T> comparison)`  |  |
 | `public T[] ToArray()`  |  |
+| `public void TrimExcess()`  |  |
+| `public bool TrueForAll(Predicate<T> match)`  |  |
 
 | property | description |  
 | -- | -- |  
