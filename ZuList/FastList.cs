@@ -122,7 +122,7 @@ namespace ZuList
         public int BinarySearch(T item)
             => this.BinarySearch(0, _size, item, null);
 
-        public int BinarySearch(T item, System.Collections.Generic.IComparer<T>? comparer)
+        public int BinarySearch(T item, IComparer<T>? comparer)
             => this.BinarySearch(0, _size, item, comparer);
 
         public int BinarySearch(int index, int count, T item, IComparer<T>? comparer)
