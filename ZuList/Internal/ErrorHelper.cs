@@ -17,7 +17,7 @@ namespace ZuList.Internal
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void ThrowArgumentException<T>(T value, string errorText)
+        internal static void ThrowArgumentException(string errorText)
         {
             throw new ArgumentException(errorText);
         }

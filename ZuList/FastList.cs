@@ -10,7 +10,6 @@ namespace ZuList
     using System.Runtime.CompilerServices;
     using System.Runtime.InteropServices;
     using ZuList.Internal;
-    using static System.Runtime.InteropServices.JavaScript.JSType;
 
     [DebuggerTypeProxy(typeof(FastListDebugView<>))]
     [DebuggerDisplay("Count = {Count} Capacity = {Capacity}")]
@@ -119,6 +118,40 @@ namespace ZuList
 
         public ReadOnlyCollection<T> AsReadOnly()
             => new(this);
+
+        public int BinarySearch(T item)
+            => this.BinarySearch(0, _size, item, null);
+
+        public int BinarySearch(T item, System.Collections.Generic.IComparer<T>? comparer)
+            => this.BinarySearch(0, _size, item, comparer);
+
+        public int BinarySearch(int index, int count, T item, IComparer<T>? comparer)
+        {
+            ErrorHelper.ThrowArgumentOutOfRangeExceptionLessThanZero(index, "index is less than 0.");
+            ErrorHelper.ThrowArgumentOutOfRangeExceptionLessThanZero(index, "count is less than 0.");
+            if (_size - index < count)
+                ErrorHelper.ThrowArgumentException("index and count do not denote a valid range in the FastList<T>.");
+
+            return Array.BinarySearch(_items, index, count, item, comparer);
+        }
+
+        public FastList<TOutput> ConvertAll<TOutput>(Converter<T, TOutput> converter)
+        {
+            ErrorHelper.ThrowArgumentNullException(converter, nameof(converter));
+
+            var list = new FastList<TOutput>(_size);
+            ConvertAllSpan(ref converter, _items.AsSpan(0, _size), list._items.AsSpan());
+            list._size = _size;
+            return list;
+        }
+
+        private static void ConvertAllSpan<TOutput>(ref Converter<T, TOutput> converter, Span<T> itemSpan, Span<TOutput> outputSpan)
+        {
+            for (int i = 0; i < itemSpan.Length; i++)
+            {
+                outputSpan[i] = converter(itemSpan[i]);
+            }
+        }
 
         public int EnsureCapacity(int capacity)
         {
@@ -566,6 +599,23 @@ namespace ZuList
         public FastList<T> Slice(int start, int length)
             => this.GetRange(start, length);
 
+        public bool TrueForAll(Predicate<T> match)
+        {
+            ErrorHelper.ThrowArgumentNullException(match, nameof(match));
+
+            return TrueForAllSpan(ref match, _items.AsSpan(0, _size));
+        }
+
+        private static bool TrueForAllSpan(ref Predicate<T> match, Span<T> itemsSpan)
+        {
+            for (int i = 0; i < itemsSpan.Length; i++)
+            {
+                if (!match(itemsSpan[i]))
+                    return false;
+            }
+            return true;
+        }
+
         public T[] ToArray()
         {
             if (_size == 0)
@@ -582,6 +632,26 @@ namespace ZuList
             Unsafe.CopyBlockUnaligned(ref dest, ref source, (uint)byteCount);
 
             return array;
+        }
+
+        public string ToDebugString()
+        {
+            if (_size == 0) return "[ ]";
+
+            var builder = new System.Text.StringBuilder();
+            var arraySpan = _items.AsSpan(0, _size);
+            builder.Append('[');
+            for (var i = 0; i < arraySpan.Length - 1; i++)
+            {
+                builder.Append(' ');
+                builder.Append(arraySpan[i]?.ToString() ?? "null");
+                builder.Append(',');
+            }
+            builder.Append(' ');
+            builder.Append(arraySpan[arraySpan.Length - 1]?.ToString() ?? "<null>");
+            builder.Append(' ');
+            builder.Append(']');
+            return builder.ToString();
         }
 
         public List<T> ToList()
@@ -603,24 +673,31 @@ namespace ZuList
             return list;
         }
 
-        public string ToDebugString()
+        public void TrimExcess()
         {
-            if (_size == 0) return "[ ]";
-
-            var builder = new System.Text.StringBuilder();
-            var arraySpan = _items.AsSpan(0, _size);
-            builder.Append('[');
-            for ( var i = 0; i < arraySpan.Length - 1; i++ )
+            var thresold = (int)(_items.Length * 0.9);
+            if (_size < thresold)
             {
-                builder.Append(' ');
-                builder.Append(arraySpan[i]?.ToString() ?? "null");
-                builder.Append(',');
+                this.DangerousEnsureCapacity(_size);
             }
-            builder.Append(' ');
-            builder.Append(arraySpan[arraySpan.Length-1]?.ToString() ?? "<null>");
-            builder.Append(' ');
-            builder.Append(']');
-            return builder.ToString();
+        }
+
+        public void Sort()
+            => this.Sort(0, _size, null);
+
+        public void Sort(IComparer<T>? comparer)
+            => this.Sort(0, _size, comparer);
+
+        public void Sort(int index, int count, IComparer<T>? comparer)
+        {
+            Array.Sort(_items, 0, count, comparer);
+            _version++;
+        }
+
+        public void Sort(Comparison<T> comparison)
+        {
+            _items.AsSpan(0, _size).Sort(comparison);
+            _version++;
         }
 
         #endregion
@@ -679,16 +756,42 @@ namespace ZuList
         public bool Contains(T item) 
             => _size != 0 && this.IndexOf(item) >= 0;
 
+        public void CopyTo(T[] array)
+            => this.CopyTo(array, 0);
+
         public void CopyTo(T[] array, int arrayIndex)
+        {
+            ErrorHelper.ThrowArgumentNullException(array, nameof(array));
+
+            if (_size == 0) return;
+            if (array.Length == 0) return;
+            if (array.Length < _size)
+                ErrorHelper.ThrowArgumentException(nameof(array));
+
+            var destArraySpan = array.AsSpan(arrayIndex, _size);
+            var sourceArraySpan = _items.AsSpan(0, _size);
+
+            // memory copying of arrays
+            var byteCount = UnsafeSize<T>.value * destArraySpan.Length;
+            ref var source = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(sourceArraySpan)!);
+            ref var dest = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(destArraySpan)!);
+            Unsafe.CopyBlockUnaligned(ref dest, ref source, (uint)byteCount);
+        }
+
+        public void CopyTo(int index, T[] array, int arrayIndex, int count)
         {
             ErrorHelper.ThrowArgumentNullException(array, nameof(array));
             ErrorHelper.ThrowNoElementInArray(array);
 
-            if (array.Length < _size)
-                ErrorHelper.ThrowArgumentException(array, nameof(array));
+            if (_size == 0) return;
+            if (array.Length == 0) return;
+            if (array.Length < index + count)
+                ErrorHelper.ThrowArgumentOutOfRangeException(nameof(array));
+            if (_items.Length < arrayIndex + count)
+                ErrorHelper.ThrowArgumentOutOfRangeException(nameof(array));
 
-            var destArraySpan = array.AsSpan(arrayIndex, _size);
-            var sourceArraySpan = _items.AsSpan(0, _size);
+            var destArraySpan = array.AsSpan(index, count);
+            var sourceArraySpan = _items.AsSpan(arrayIndex, count);
 
             // memory copying of arrays
             var byteCount = UnsafeSize<T>.value * destArraySpan.Length;
@@ -864,7 +967,7 @@ namespace ZuList
             ErrorHelper.ThrowNoElementInArray(array);
 
             if (array.Length < _size)
-                ErrorHelper.ThrowArgumentException(array, nameof(array));
+                ErrorHelper.ThrowArgumentException(nameof(array));
 
             Array.Copy(_items, 0, array, arrayIndex, _size);
         }

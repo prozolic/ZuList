@@ -20,13 +20,6 @@ namespace ZuList.Internal
 
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
         public T[] Items
-        {
-            get
-            {
-                T[] items = new T[_fastList.Count];
-                _fastList.CopyTo(items, 0);
-                return items;
-            }
-        }
+            => _fastList.ToArray();
     }
 }
