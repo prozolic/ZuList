@@ -1,5 +1,6 @@
 namespace ZuList.Test
 {
+    using System.Collections.ObjectModel;
     using System.Linq;
     using ZuList;
 
@@ -132,6 +133,190 @@ namespace ZuList.Test
                     Assert.Equal(strArray.Length, list.Count);
                     Assert.Equal(strArray.Length, list.Capacity);
                     Assert.True(strArray.SequenceEqual(list));
+                }
+            }
+
+            public class AsReadOnly
+            {
+                [Fact]
+                public void Validate()
+                {
+                    var list = new FastList<int>(Enumerable.Range(1, 5).ToArray());
+                    var readonlycollection = list.AsReadOnly();
+
+                    Assert.True(readonlycollection.GetType() == typeof(ReadOnlyCollection<int>));
+                }
+            }
+
+            public class BinarySearch
+            {
+                [Fact]
+                public void Validate()
+                {
+                    Assert.Fail("implement");
+                }
+            }
+
+            public class ConvertAll
+            {
+                [Fact]
+                public void Validate()
+                {
+                    var rangeCount = 5;
+                    var intRangeArr = Enumerable.Range(1, rangeCount).ToArray();
+                    var stringRangeArr = new[] { "1", "2", "3", "4", "5" };
+                    var list = new FastList<int>(Enumerable.Range(1, rangeCount).ToArray());
+                    var stringList = list.ConvertAll(x => x.ToString());
+
+                    Assert.Equal(rangeCount, stringList.Count);
+                    Assert.Equal(rangeCount, stringList.Capacity);
+                    Assert.True(stringRangeArr.SequenceEqual(stringList));
+                }
+
+                [Fact]
+                public void ThrowArgumentNull()
+                {
+                    var list = new FastList<int>();
+                    Assert.Throws<ArgumentNullException>(() => list.ConvertAll<string>(null));
+                }
+            }
+
+            public class EnsureCapacity
+            {
+                [Fact]
+                public void Validate()
+                {
+                    var rangeCount = 5;
+                    var list = new FastList<int>(Enumerable.Range(1, rangeCount).ToArray());
+
+                    {
+                        var currentCapacity = list.EnsureCapacity(3);
+                        Assert.Equal(rangeCount, currentCapacity);
+                        Assert.Equal(rangeCount, list.Count);
+                        Assert.Equal(rangeCount, list.Capacity);
+                    }
+                    {
+                        var ensureCapacityValue = 10;
+                        var currentCapacity = list.EnsureCapacity(ensureCapacityValue);
+                        Assert.Equal(ensureCapacityValue, currentCapacity);
+                        Assert.Equal(rangeCount, list.Count);
+                        Assert.Equal(ensureCapacityValue, list.Capacity);
+                    }
+                }
+            }
+
+            public class Exists
+            {
+                [Fact]
+                public void Validate()
+                {
+                    var rangeCount = 5;
+                    var list = new FastList<int>(Enumerable.Range(1, rangeCount).ToArray());
+                    Assert.True(list.Exists(i => i == 1));
+                    Assert.False(list.Exists(i => i > 5));
+                }
+            }
+
+            public class Find
+            {
+                [Fact]
+                public void Validate()
+                {
+                    var list = new FastList<string>(new[] { "1", "2", "3", "4", "5" });
+                    Assert.Equal("1", list.Find(i => i == "1"));
+                    Assert.Null(list.Find(i => i == "Error"));
+                }
+
+                [Fact]
+                public void ThrowArgumentNull()
+                {
+                    var list = new FastList<int>();
+                    Assert.Throws<ArgumentNullException>(() => list.Find(null));
+                }
+            }
+
+            public class FindIndex
+            {
+                [Fact]
+                public void Validate()
+                {
+                    var list = new FastList<string>(new[] { "1", "2", "3", "4", "5" });
+                    Assert.Equal(0, list.FindIndex(i => i == "1"));
+                    Assert.Equal(-1,list.FindIndex(i => i == "Error"));
+                }
+
+                [Fact]
+                public void ThrowArgumentNull()
+                {
+                    var list = new FastList<int>();
+                    Assert.Throws<ArgumentNullException>(() => list.FindIndex(null));
+                }
+            }
+
+            public class FindLast
+            {
+                [Fact]
+                public void Validate()
+                {
+                    var list = new FastList<string>(new[] { "1", "2", "3", "4", "5" });
+                    Assert.Equal("1", list.FindLast(i => i == "1"));
+                    Assert.Null(list.FindLast(i => i == "Error"));
+                }
+
+                [Fact]
+                public void ThrowArgumentNull()
+                {
+                    var list = new FastList<int>();
+                    Assert.Throws<ArgumentNullException>(() => list.FindLast(null));
+                }
+            }
+
+            public class FindLastIndex
+            {
+                [Fact]
+                public void Validate()
+                {
+                    var list = new FastList<string>(new[] { "1", "2", "3", "4", "5" });
+                    Assert.Equal(0, list.FindIndex(i => i == "1"));
+                    Assert.Equal(-1, list.FindIndex(i => i == "Error"));
+                }
+
+                [Fact]
+                public void ThrowArgumentNull()
+                {
+                    var list = new FastList<int>();
+                    Assert.Throws<ArgumentNullException>(() => list.FindIndex(null));
+                }
+            }
+
+            public class FindAll
+            {
+                [Fact]
+                public void Validate()
+                {
+                    var list = new FastList<int>(Enumerable.Range(1,5).ToArray());
+                    Assert.True(new[] { 1 }.SequenceEqual(list.FindAll(i => i == 1)));
+                    Assert.True(new[] { 4, 5 }.SequenceEqual(list.FindAll(i => i > 3)));
+                    Assert.True(Array.Empty<int>().SequenceEqual(list.FindAll(i => i > 5)));
+                }
+
+                [Fact]
+                public void ThrowArgumentNull()
+                {
+                    var list = new FastList<int>();
+                    Assert.Throws<ArgumentNullException>(() => list.FindAll(null));
+                }
+            }
+
+            public class ForEach
+            {
+                [Fact]
+                public void Validate()
+                {
+                    var list = new FastList<string>(new[] { "1", "2", "3", "4", "5" });
+                    var result = new FastList<string>(5);
+                    list.ForEach(i => result.Add(i));
+                    Assert.True(list.SequenceEqual(result));
                 }
             }
         }
