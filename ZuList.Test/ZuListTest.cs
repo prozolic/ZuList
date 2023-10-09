@@ -84,6 +84,29 @@ namespace ZuList.Test
             }
         }
 
+        public class ForEach
+        {
+            [Fact]
+            public void Validate()
+            {
+                var foreachInvoker = () =>
+                {
+                    try
+                    {
+                        var list = new FastList<string>(new[] { "1", "2", "3", "4", "5" });
+                        foreach (var item in list)
+                        { }
+                        return true;
+                    }
+                    catch (Exception e)
+                    {
+                        return false;
+                    }
+                };
+                Assert.True(foreachInvoker());
+            }
+        }
+
         public class ListCompatible
         {
             public class AddRange
@@ -242,7 +265,7 @@ namespace ZuList.Test
                 {
                     var list = new FastList<string>(new[] { "1", "2", "3", "4", "5" });
                     Assert.Equal(0, list.FindIndex(i => i == "1"));
-                    Assert.Equal(-1,list.FindIndex(i => i == "Error"));
+                    Assert.Equal(-1, list.FindIndex(i => i == "Error"));
                 }
 
                 [Fact]
@@ -294,7 +317,7 @@ namespace ZuList.Test
                 [Fact]
                 public void Validate()
                 {
-                    var list = new FastList<int>(Enumerable.Range(1,5).ToArray());
+                    var list = new FastList<int>(Enumerable.Range(1, 5).ToArray());
                     Assert.True(new[] { 1 }.SequenceEqual(list.FindAll(i => i == 1)));
                     Assert.True(new[] { 4, 5 }.SequenceEqual(list.FindAll(i => i > 3)));
                     Assert.True(Array.Empty<int>().SequenceEqual(list.FindAll(i => i > 5)));
@@ -317,6 +340,46 @@ namespace ZuList.Test
                     var result = new FastList<string>(5);
                     list.ForEach(i => result.Add(i));
                     Assert.True(list.SequenceEqual(result));
+                }
+            }
+
+            public class InsertRange
+            {
+                private static readonly int[] array = Enumerable.Range(1, 5).ToArray();
+                private static readonly string[] strArray = array.Select(a => a.ToString()).ToArray();
+
+                [Fact]
+                public void ValidateValue()
+                {
+                    var list = new FastList<int>();
+                    list.InsertRange(0,(IEnumerable<int>)array);
+
+                    Assert.Equal(array.Length, list.Count);
+                    Assert.Equal(8, list.Capacity);
+                    Assert.True(array.SequenceEqual(list));
+
+                    list.InsertRange(2, array);
+
+                    Assert.Equal(array.Length * 2, list.Count);
+                    Assert.Equal(16, list.Capacity);
+                    Assert.True(new[] {1,2,1,2,3,4,5,3,4,5}.SequenceEqual(list));
+                }
+
+                [Fact]
+                public void ValidateRefValue()
+                {
+                    var list = new FastList<string>();
+                    list.InsertRange(0, (IEnumerable<string>)strArray);
+
+                    Assert.Equal(strArray.Length, list.Count);
+                    Assert.Equal(8, list.Capacity);
+                    Assert.True(strArray.SequenceEqual(list));
+
+                    list.InsertRange(2, strArray);
+
+                    Assert.Equal(array.Length * 2, list.Count);
+                    Assert.Equal(16, list.Capacity);
+                    Assert.True(new[] { "1", "2", "1", "2", "3", "4", "5", "3", "4", "5" }.SequenceEqual(list));
                 }
             }
         }
@@ -397,35 +460,35 @@ namespace ZuList.Test
                 public void NonValue()
                 {
                     var list = new FastList<int>();
-                    Assert.False(list.Contains(1));
+                    Assert.DoesNotContain(1, list);
                 }
 
                 [Fact]
                 public void NonValueRef()
                 {
                     var list = new FastList<string>();
-                    Assert.False(list.Contains(""));
-                    Assert.False(list.Contains("test"));
+                    Assert.DoesNotContain("", list);
+                    Assert.DoesNotContain("test", list);
                 }
 
                 [Fact]
                 public void Value()
                 {
                     var list = new FastList<int>(new[] { 1, 2, 3 });
-                    Assert.True(list.Contains(1));
-                    Assert.True(list.Contains(2));
-                    Assert.True(list.Contains(3));
-                    Assert.False(list.Contains(4));
+                    Assert.Contains(1, list);
+                    Assert.Contains(2, list);
+                    Assert.Contains(3, list);
+                    Assert.DoesNotContain(4, list);
                 }
 
                 [Fact]
                 public void ValueRef()
                 {
                     var list = new FastList<string>(new[] { "test", "test2", "test3" });
-                    Assert.True(list.Contains("test"));
-                    Assert.True(list.Contains("test2"));
-                    Assert.True(list.Contains("test3"));
-                    Assert.False(list.Contains("test4"));
+                    Assert.Contains("test", list);
+                    Assert.Contains("test2", list);
+                    Assert.Contains("test3", list);
+                    Assert.DoesNotContain("test4", list);
                 }
             }
 
@@ -540,7 +603,7 @@ namespace ZuList.Test
                 [Fact]
                 public void Value()
                 {
-                    var list = new FastList<int>(new[] {1,2,3});
+                    var list = new FastList<int>(new[] { 1, 2, 3 });
                     Assert.False(list.Remove(4));
                     Assert.Equal(3, list.Count);
 
@@ -557,7 +620,7 @@ namespace ZuList.Test
                 [Fact]
                 public void Value2()
                 {
-                    var list = new FastList<string>(new[] {"", "test", "test2"});
+                    var list = new FastList<string>(new[] { "", "test", "test2" });
                     Assert.False(list.Remove("NoValue"));
                     Assert.Equal(3, list.Count);
 
