@@ -192,15 +192,7 @@ namespace ZuList
                 this.DangerousEnsureCapacity(this.CalculateEnsureCapacity(addedSize));
             }
 
-            Span<T> destItem = _items.AsSpan(size, argsFastListSize);
-            Span<T> sourceItemSpan = fastList._items.AsSpan(0, argsFastListSize);
-
-            // additem memory copying of arrays
-            var addItemByteCount = UnsafeSize<T>.value * destItem.Length;
-            ref var source = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(sourceItemSpan)!);
-            ref var dest = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(destItem)!);
-            Unsafe.CopyBlockUnaligned(ref dest, ref source, (uint)addItemByteCount);
-
+            DangerousCopyArray(_items.AsSpan(size, argsFastListSize), fastList._items);
             _size = addedSize;
             _version++;
         }
@@ -218,17 +210,19 @@ namespace ZuList
                 this.DangerousEnsureCapacity(this.CalculateEnsureCapacity(addedSize));
             }
 
-            Span<T> destItem = _items.AsSpan(size, argsArraySize);
-            Span<T> sourceItemSpan = array.AsSpan();
-
-            // additem memory copying of arrays
-            var addItemByteCount = UnsafeSize<T>.value * destItem.Length;
-            ref var source = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(sourceItemSpan)!);
-            ref var dest = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(destItem)!);
-            Unsafe.CopyBlockUnaligned(ref dest, ref source, (uint)addItemByteCount);
-
+            DangerousCopyArray(_items.AsSpan(size, argsArraySize), array);
             _size = addedSize;
             _version++;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void DangerousCopyArray(Span<T> destItem, T[] sourceItemArray)
+        {
+            // additem memory copying of arrays
+            var addItemByteCount = UnsafeSize<T>.value * destItem.Length;
+            ref var source = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetArrayDataReference(sourceItemArray)!);
+            ref var dest = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(destItem)!);
+            Unsafe.CopyBlockUnaligned(ref dest, ref source, (uint)addItemByteCount);
         }
 
         public void AddRange(ICollection<T> collection)
@@ -644,7 +638,7 @@ namespace ZuList
             for (var i = 0; i < arraySpan.Length - 1; i++)
             {
                 builder.Append(' ');
-                builder.Append(arraySpan[i]?.ToString() ?? "null");
+                builder.Append(arraySpan[i]?.ToString() ?? "<null>");
                 builder.Append(',');
             }
             builder.Append(' ');
