@@ -1,5 +1,8 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using BenchmarkDotNet.Running;
+using System.Diagnostics;
+using ZuList;
+using ZuList.Benchmark;
 
-var summary = BenchmarkRunner.Run(typeof(Program).Assembly);
-return;
+var switcher = new BenchmarkSwitcher(new[] { typeof(Benchmark) });
+switcher.Run(new string[] { "Release", "--filter","*" });
