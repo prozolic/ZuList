@@ -39,87 +39,87 @@ public void Sample()
 
 | property | description |
 | -- | -- |
-| `public bool IsEmpty` |  |
+| `public bool IsEmpty` | Returns true if there is no element in `FastList<T>` |
 
 **Compatibility with `List<T>`**
 
-| method | description |
-| -- | -- |
-| `public void AddRange(IEnumerable<T> collection)` |  |
-| `public ReadOnlyCollection<T> AsReadOnly()` |  |
-| `public int BinarySearch(T item)` |  |
-| `public int BinarySearch(T item, IComparer<T>? comparer)` |  |
-| `public int BinarySearch(int index, int count, T item, IComparer<T>? comparer)` |  |
-| `public FastList<TOutput> ConvertAll<TOutput>(Converter<T, TOutput> converter)` |  |
-| `public int EnsureCapacity(int capacity)`  |  |
-| `public bool Exists(Predicate<T> match)`  |  |
-| `public T? Find(Predicate<T> match)`  |  |
-| `public int FindIndex(Predicate<T> match)`  |  |
-| `public int FindIndex(int startIndex, Predicate<T> match)`  |  |
-| `public int FindIndex(int startIndex, int count, Predicate<T> match)`  |  |
-| `public T? FindLast(Predicate<T> match)`  |  |
-| `public int FindLastIndex(Predicate<T> match)`  |  |
-| `public int FindLastIndex(int startIndex, Predicate<T> match)`  |  |
-| `public int FindLastIndex(int startIndex, int count, Predicate<T> match)`  |  |
-| `public FastList<T> FindAll(Predicate<T> match)`  |  |
-| `public void ForEach(Action<T> action)`  |  |
-| `public FastList<T> GetRange(int index, int count)`  |  |
-| `public void InsertRange(int index, IEnumerable<T> collection)`  |  |
-| `public int RemoveAll(Predicate<T> match)`  |  |
-| `public void RemoveRange(int index, int count)`  |  |
-| `public void Reverse()`  |  |
-| `public void Reverse(int index, int count)`  |  |
-| `public int ShrinkToFitCapacity()`  |  |
+| method |
+| -- |
+| `public void AddRange(IEnumerable<T> collection)` |
+| `public ReadOnlyCollection<T> AsReadOnly()` |
+| `public int BinarySearch(T item)` |
+| `public int BinarySearch(T item, IComparer<T>? comparer)` |
+| `public int BinarySearch(int index, int count, T item, IComparer<T>? comparer)` |
+| `public FastList<TOutput> ConvertAll<TOutput>(Converter<T, TOutput> converter)` |
+| `public int EnsureCapacity(int capacity)`  |
+| `public bool Exists(Predicate<T> match)`  |
+| `public T? Find(Predicate<T> match)`  |
+| `public int FindIndex(Predicate<T> match)`  |
+| `public int FindIndex(int startIndex, Predicate<T> match)`  |
+| `public int FindIndex(int startIndex, int count, Predicate<T> match)`  |
+| `public T? FindLast(Predicate<T> match)`  |
+| `public int FindLastIndex(Predicate<T> match)`  |
+| `public int FindLastIndex(int startIndex, Predicate<T> match)`  |
+| `public int FindLastIndex(int startIndex, int count, Predicate<T> match)`  |
+| `public FastList<T> FindAll(Predicate<T> match)`  |
+| `public void ForEach(Action<T> action)`  |
+| `public FastList<T> GetRange(int index, int count)`  |
+| `public void InsertRange(int index, IEnumerable<T> collection)`  |
+| `public int RemoveAll(Predicate<T> match)`  |
+| `public void RemoveRange(int index, int count)`  |
+| `public void Reverse()`  |
+| `public void Reverse(int index, int count)`  |
+| `public int ShrinkToFitCapacity()`  |
 | `public FastList<T> Slice(int start, int length)`  |  
-| `public void Sort()`  |  |
-| `public void Sort(IComparer<T>? comparer)`  |  |
-| `public void Sort(int index, int count, IComparer<T>? comparer)`  |  |
-| `public void Sort(Comparison<T> comparison)`  |  |
-| `public T[] ToArray()`  |  |
-| `public void TrimExcess()`  |  |
-| `public bool TrueForAll(Predicate<T> match)`  |  |
+| `public void Sort()`  |
+| `public void Sort(IComparer<T>? comparer)`  |
+| `public void Sort(int index, int count, IComparer<T>? comparer)`  |
+| `public void Sort(Comparison<T> comparison)`  |
+| `public T[] ToArray()`  |
+| `public void TrimExcess()`  |
+| `public bool TrueForAll(Predicate<T> match)`  |
 
-| property | description |  
-| -- | -- |  
-| `public int Capacity`  |  |  
+| property |
+| -- |
+| `public int Capacity`  |
 
 **class FastList : `IList<T>`**
 
-| method | description |
-| -- | -- |
-| `public void Add(T item)` |  |
-| `public void Clear()` |  |
-| `public bool Contains(T item)` |  |
-| `public void CopyTo(T[] array, int arrayIndex)` |  |
-| `public IEnumerator<T> GetEnumerator()` |  |
-| `public int IndexOf(T item)` |  |
-| `public void Insert(int index, T item)` |  |
-| `public bool Remove(T item)` |  |
-| `public void RemoveAt(int index)` |  |
+| method |
+| -- |
+| `public void Add(T item)` |
+| `public void Clear()` |
+| `public bool Contains(T item)` |
+| `public void CopyTo(T[] array, int arrayIndex)` |
+| `public IEnumerator<T> GetEnumerator()` |
+| `public int IndexOf(T item)` |
+| `public void Insert(int index, T item)` |
+| `public bool Remove(T item)` |
+| `public void RemoveAt(int index)` |
 
-| property | description |
-| -- | -- |
-| `public T this[int index]`  |  |
-| `public int Count`  |  |
-| `public bool IsReadOnly`  |  |
+| property |
+| -- |
+| `public T this[int index]`  |
+| `public int Count`  |
+| `public bool IsReadOnly`  |
 
 **class FastList : IList**
 
-| method | description |
-| -- | -- |
-| `public int Add(object? value)` |  |
-| `public bool Contains(object? value)` |  |
-| `public int IndexOf(object? value)` |  |
-| `public void Insert(int index, object? value)` |  |
-| `public void Remove(object? value)` |  |
-| `public void CopyTo(Array array, int arrayIndex)` |  |
+| method |
+| -- |
+| `public int Add(object? value)` |
+| `public bool Contains(object? value)` |
+| `public int IndexOf(object? value)` |
+| `public void Insert(int index, object? value)` |
+| `public void Remove(object? value)` |
+| `public void CopyTo(Array array, int arrayIndex)` |
 
-| property | description |
-| -- | -- |
-| `object? IList.this[int index]`  |  |
-| `public bool IsFixedSize`  |  |
-| `public bool IsSynchronized`  |  |
-| `public object SyncRoot`  |  |
+| property |
+| -- |
+| `object? IList.this[int index]`  |
+| `public bool IsFixedSize`  |
+| `public bool IsSynchronized`  |
+| `public object SyncRoot`  |
 
 ## License
 
