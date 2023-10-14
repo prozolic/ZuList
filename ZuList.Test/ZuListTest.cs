@@ -121,7 +121,7 @@ namespace ZuList.Test
                     list.AddRange((IEnumerable<int>)array);
 
                     Assert.Equal(array.Length, list.Count);
-                    Assert.Equal(8, list.Capacity);
+                    Assert.Equal(list.Count, list.Capacity);
                     Assert.True(array.SequenceEqual(list));
                 }
 
@@ -132,7 +132,7 @@ namespace ZuList.Test
                     list.AddRange((IEnumerable<string>)strArray);
 
                     Assert.Equal(strArray.Length, list.Count);
-                    Assert.Equal(8, list.Capacity);
+                    Assert.Equal(list.Count, list.Capacity);
                     Assert.True(strArray.SequenceEqual(list));
                 }
 
@@ -173,10 +173,27 @@ namespace ZuList.Test
 
             public class BinarySearch
             {
+                private static readonly int[] array = Enumerable.Range(1, 5).ToArray();
+                private static readonly string[] strArray = array.Select(a => a.ToString()).ToArray();
+
                 [Fact]
                 public void Validate()
                 {
-                    Assert.Fail("implement");
+                    var list = new FastList<int>();
+                    list.AddRange(array);
+
+                    Assert.Equal(1, list.BinarySearch(2));
+                    Assert.Equal(4, list.BinarySearch(5));
+                }
+
+                [Fact]
+                public void ValidateRefValue()
+                {
+                    var list = new FastList<string>();
+                    list.AddRange(strArray);
+
+                    Assert.Equal(1, list.BinarySearch("2"));
+                    Assert.Equal(4, list.BinarySearch("5"));
                 }
             }
 
