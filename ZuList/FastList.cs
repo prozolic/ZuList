@@ -43,12 +43,11 @@ namespace ZuList
                 return;
             }
 
-            var argsListArray = fastList._items.AsSpan(0, argsListSize);
             _items = new T[argsListSize];
 
             // memory copying of arrays
             var byteCount = UnsafeSize<T>.value * argsListSize;
-            ref var source = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(argsListArray)!);
+            ref var source = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetArrayDataReference(fastList._items)!);
             ref var dest = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetArrayDataReference(_items)!);
             Unsafe.CopyBlockUnaligned(ref dest, ref source, (uint)byteCount);
 
@@ -246,10 +245,17 @@ namespace ZuList
         {
             ErrorHelper.ThrowArgumentNullException(collection, nameof(collection));
 
-            using IEnumerator<T> en = collection!.GetEnumerator();
-            while (en.MoveNext())
+            if (collection is ICollection<T>)
             {
-                Add(en.Current);
+                this.AddRange((collection as ICollection<T>)!);
+            }
+            else
+            {
+                using IEnumerator<T> en = collection!.GetEnumerator();
+                while (en.MoveNext())
+                {
+                    Add(en.Current);
+                }
             }
         }
 
@@ -684,7 +690,7 @@ namespace ZuList
 
         public void Sort(int index, int count, IComparer<T>? comparer)
         {
-            Array.Sort(_items, 0, count, comparer);
+            Array.Sort(_items, index, count, comparer);
             _version++;
         }
 
