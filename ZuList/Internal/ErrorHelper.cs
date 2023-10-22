@@ -69,7 +69,13 @@ namespace ZuList.Internal
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void ThrowNoElementInArray(Array value)
         {
-            if (value.Length == 0) throw new InvalidOperationException("There is no element of anything.");
+            if (value.Length == 0) throw new ArgumentException("There is no element of anything.");
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void ThrowMultidimensional(Array value)
+        {
+            if (value.Rank != 1) throw new ArgumentException("array is multidimensional.");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

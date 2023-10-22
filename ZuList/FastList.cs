@@ -965,6 +965,7 @@ namespace ZuList
         {
             ErrorHelper.ThrowArgumentNullException(array, nameof(array));
             ErrorHelper.ThrowNoElementInArray(array);
+            ErrorHelper.ThrowMultidimensional(array);
 
             if (array.Length < _size)
                 ErrorHelper.ThrowArgumentException(nameof(array));
